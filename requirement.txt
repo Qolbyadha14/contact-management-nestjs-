@@ -1,0 +1,45 @@
+* User Management
+ 
+Attributes
+- Username
+- Password
+- Name
+
+Actions
+- register
+- login
+- update
+- get
+- logout
+
+* Contact Management
+
+Attributes
+- First Name
+- Last Name
+- Email
+- Phone Number
+
+Actions
+- create
+- update
+- get
+- search
+- remove
+
+* Address Management
+
+Attributes
+- Street
+- City
+- Province
+- Country
+- Postal Code
+
+
+Actions
+-> create
+-> update
+-> get
+-> search
+-> remove
