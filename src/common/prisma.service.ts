@@ -1,6 +1,6 @@
 import { PrismaClient,Prisma } from '@prisma/client';
 import { Logger } from "winston";
-import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
+import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 
 // @ts-ignore
@@ -8,7 +8,7 @@ import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 export class PrismaService extends PrismaClient<
   Prisma.PrismaClientOptions,
   string> implements OnModuleInit {
-  constructor(@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: Logger ) {
+  constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger ) {
     super({
       log: [
         { emit: 'event', level: 'query' },
