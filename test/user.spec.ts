@@ -73,4 +73,38 @@ describe('UserController', () => {
       expect(response.body.errors).toBe("username already exists");
     })
   })
+
+  describe("POST /user/login", () => {
+    beforeEach(async () => {
+      await testService.deleteUser()
+      await testService.createUser();
+    })
+
+    it("should be rejected if request is invalid", async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: "",
+          password: "",
+        })
+      logger.info(response.body)
+
+      expect(response.status).toBe(422);
+      expect(response.body.errors).toBe("Validation failed");
+    });
+
+    it('should login user', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/users/login')
+        .send({
+          username: "test",
+          password: "test",
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe("test");
+      expect(response.body.data.name).toBe("test");
+      expect(response.body.data.token).not.toBe(null);
+    })
+  })
 });
