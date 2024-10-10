@@ -194,4 +194,33 @@ describe('UserController', () => {
       expect(response.body.data.token).not.toBe(null);
     })
   })
+
+  describe("DELETE /user/current", () => {
+    beforeEach(async () => {
+      await testService.deleteUser()
+      await testService.createUser();
+    })
+
+    it("should be rejected if token is invalid", async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/api/users/current')
+        .set({ Authorization: "invalid" })
+        logger.info(response.body)
+
+      expect(response.status).toBe(401);
+      expect(response.body.errors).toBe("Unauthorized");
+    });
+
+    it('should be able to get current user', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/api/users/current')
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBe(true);
+
+      const user = await testService.getUser();
+      expect(user.token).toBeNull()
+    })
+  })
 });
