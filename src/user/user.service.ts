@@ -1,5 +1,5 @@
 import { HttpException, Inject, Injectable } from "@nestjs/common";
-import { LoginUserRequest, RegisterUserRequest, UserResponse } from "../model/user.model";
+import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from "../model/user.model";
 import { ValidationService } from "../common/validation.service";
 import { Logger } from "winston";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
@@ -18,7 +18,7 @@ export class UserService {
   ) {}
 
   async register(request: RegisterUserRequest): Promise<UserResponse> {
-    this.logger.info(`Registering user: ${JSON.stringify(request)}`);
+    this.logger.debug(`Registering user: ${JSON.stringify(request)}`);
 
     const registeredRequest: RegisterUserRequest = this.validationService.validate(UserValidation.REGISTER, request);
 
@@ -44,7 +44,7 @@ export class UserService {
   }
 
   async login(request: LoginUserRequest): Promise<UserResponse> {
-    this.logger.info(`User login: ${JSON.stringify(request)}`);
+    this.logger.debug(`User login: ${JSON.stringify(request)}`);
 
     const loginRequest: RegisterUserRequest = this.validationService.validate(UserValidation.LOGIN, request);
 
@@ -84,6 +84,31 @@ export class UserService {
     return {
       username: user.username,
       name: user.name
+    }
+  }
+
+  async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
+    this.logger.debug(`Updating user: ${JSON.stringify(request)}`);
+    const updatedRequest: UpdateUserRequest = this.validationService.validate(UserValidation.UPDATE, request);
+
+    if (updatedRequest.name) {
+      user.name = updatedRequest.name
+    }
+
+    if (updatedRequest.password) {
+      user.password = await bcrypt.hash(updatedRequest.password, 10)
+    }
+
+    const result = await this.prismaService.user.update({
+      where: {
+        username: user.username
+      },
+      data: user
+    })
+
+    return {
+      username: result.username,
+      name: result.name
     }
   }
 }
