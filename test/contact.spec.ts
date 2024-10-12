@@ -66,4 +66,37 @@ describe('ContactController', () => {
       expect(response.body.data.phone_number).toBe("08123456789");
     })
   })
+
+  describe("GET /api/contacts", () => {
+    beforeEach(async () => {
+      await testService.deleteContact()
+      await testService.deleteUser()
+
+      await testService.createUser();
+      await testService.createContact();
+    })
+
+    it('should be rejected if contact not found ', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id + 1}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBe("Contact not found");
+    })
+
+    it("should be able to get contact", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.first_name).toBe(contact.first_name);
+      expect(response.body.data.last_name).toBe(contact.last_name);
+      expect(response.body.data.email).toBe(contact.email);
+      expect(response.body.data.phone_number).toBe(contact.phone_number);
+    });
+  })
 });
