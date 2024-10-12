@@ -1,6 +1,11 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
 import { ContactService } from "./contact.service";
-import { ContactResponse, CreateContactRequest, UpdateContactRequest } from "../model/contact.model";
+import {
+  ContactResponse,
+  CreateContactRequest,
+  SearchContactRequest,
+  UpdateContactRequest
+} from "../model/contact.model";
 import { WebResponse } from "../model/web.model";
 import { Auth } from "../common/auth.decorator";
 import { User } from "@prisma/client";
@@ -47,4 +52,39 @@ export class ContactController{
       data: result,
     }
   }
+
+  @Delete("/:contactId")
+  @HttpCode(200)
+  async destroy(
+    @Auth() user: User,
+    @Param("contactId", ParseIntPipe) contactId: number): Promise<WebResponse<boolean>> {
+
+    await this.contactService.delete(user, contactId);
+
+    return {
+      data: true,
+    }
+  }
+
+  @Get()
+  @HttpCode(200)
+  async index(
+    @Auth() user: User,
+    @Query('name') name?: string,
+    @Query('email') email?: string,
+    @Query('phone_number') phone_number?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('size', new ParseIntPipe({ optional: true })) size?: number
+  ): Promise<WebResponse<ContactResponse[]>> {
+    const request: SearchContactRequest = {
+      name: name,
+      email: email,
+      phone_number: phone_number,
+      page: page || 1,
+      size: size || 10
+    }
+
+    return this.contactService.search(user, request);
+  }
+
 }

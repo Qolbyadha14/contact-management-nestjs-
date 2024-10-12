@@ -67,7 +67,7 @@ describe('ContactController', () => {
     })
   })
 
-  describe("GET /api/contacts", () => {
+  describe("GET /api/contacts/{id}", () => {
     beforeEach(async () => {
       await testService.deleteContact()
       await testService.deleteUser()
@@ -100,7 +100,7 @@ describe('ContactController', () => {
     });
   })
 
-  describe("PUT /api/contacts", () => {
+  describe("PUT /api/contacts/{id}", () => {
     beforeEach(async () => {
       await testService.deleteContact()
       await testService.deleteUser()
@@ -163,4 +163,125 @@ describe('ContactController', () => {
       expect(response.body.data.phone_number).toBe("081234567891");
     })
   })
+  
+  describe("DELETE /api/contacts/{id}", () => {
+    beforeEach(async () => {
+      await testService.deleteContact()
+      await testService.deleteUser()
+
+      await testService.createUser();
+      await testService.createContact();
+    })
+
+    it("should be rejected if contact not found", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id + 1}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBe("Contact not found");
+    });
+
+    it("should be able to delete contact", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBe(true);
+    });
+  })
+
+  describe("GET /api/contacts", () => {
+    beforeEach(async () => {
+      await testService.deleteContact()
+      await testService.deleteUser()
+      await testService.createUser();
+      await testService.createContact();
+    })
+
+    it("should be able to search contacts", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    })
+
+    it("should be able to search contacts by name", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ name: "es" })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    })
+
+    it("should be able to search contacts by name not found", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ name: "wrong-name-hello" })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("should be able to search contacts by email", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ email: "hallo" })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    })
+
+    it("should be able to search contacts by email not found", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ email: "wrong-email-hello" })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("should be able to search contacts by phone", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ phone_number: "test" })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    })
+
+    it("should be able to search contacts by phone not found", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ phone_number: "wrong-phone" })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("should be able to search contacts with pagination", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({ page: 2, size: 1 })
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+      expect(response.body.paging.current_page).toBe(2);
+      expect(response.body.paging.total_page).toBe(1);
+      expect(response.body.paging.size).toBe(1);
+    })
+  });
 });

@@ -20,3 +20,11 @@ export class UpdateContactRequest {
   email?: string
   phone_number?: string
 }
+
+export class SearchContactRequest {
+  name?: string;
+  email?: string;
+  phone_number?: string;
+  page?: number;
+  size?: number
+}
