@@ -220,4 +220,54 @@ describe('AddressController', () => {
       expect(response.body.errors).toBe("Address not found");
     })
   })
+
+  describe("DELETE /api/contacts/:contactId/addresses/:addressId", () => {
+    beforeEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    })
+
+    it("should be rejected if contact id is invalid", async () => {
+
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id + 1}/addresses/${address.id}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBe("Contact not found");
+    });
+
+    it("should be rejected if address id is invalid", async () => {
+
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}/addresses/${address.id + 1}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBe("Address not found");
+    });
+
+    it('should be able to delete address ', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}/addresses/${address.id}`)
+        .set({ Authorization: "test" })
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBe(true);
+
+      const addressResult = await testService.getAddress();
+      expect(addressResult).toBeNull();
+    })
+  })
 });

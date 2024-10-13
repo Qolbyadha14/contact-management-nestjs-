@@ -24,4 +24,9 @@ export class AddressValidation {
     country: z.string().min(1).max(100),
     postal_code: z.string().min(1).max(10),
   })
+
+  static readonly REMOVE: ZodType = z.object({
+    address_id: z.number().min(1).positive(),
+    contact_id: z.number().min(1).positive(),
+  })
 }
