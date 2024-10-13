@@ -13,6 +13,7 @@ import { AuthMiddleware } from "./auth.middleware";
   imports: [
     // Setup Nest Logger using winston
     WinstonModule.forRoot({
+      level: 'debug',
       format: winston.format.json(),
       transports: [new winston.transports.Console()],
     }),
