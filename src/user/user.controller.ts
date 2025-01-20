@@ -4,13 +4,21 @@ import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse 
 import { WebResponse } from "../model/web.model";
 import { User } from "@prisma/client";
 import { Auth } from "../common/auth.decorator";
+import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 
+@ApiTags('User')
 @Controller('/api/users')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Post('/register')
+  @ApiResponse({ status: 201, description: 'The record has been successfully created.'})
+  @ApiResponse({ status: 403, description: 'Forbidden.'})
+  @ApiBody({
+      type: RegisterUserRequest,
+      description: 'Json structure for user object',
+  })
   async register(@Body() request: RegisterUserRequest): Promise<WebResponse<UserResponse>> {
 
     const result = await this.userService.register(request);
