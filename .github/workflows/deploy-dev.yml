@@ -48,12 +48,12 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          rsync -avz --exclude=node_modules --exclude=.git ./package.json ./package-lock.json ./dist ./prisma $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
+          rsync -avz --exclude=node_modules --exclude=.git $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
           
           # Create .env file on the VPS with the DATABASE_URL
-          ssh $USERNAME@$HOST "echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> /var/www/contact-management-nestjs/backend/.env"
-          ssh $USERNAME@$HOST "echo 'DATABASE=${{ secrets.DATABASE }}' >> /var/www/contact-management-nestjs/backend/.env"
-          ssh $USERNAME@$HOST "echo 'PORT=${{ secrets.PORT }}' >> /var/www/contact-management-nestjs/backend/.env"
+          ssh $USERNAME@$HOST "grep -qxF 'DATABASE_URL=${{ secrets.DATABASE_URL }}' /var/www/contact-management-nestjs/backend/.env || echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> /var/www/contact-management-nestjs/backend/.env"
+          ssh $USERNAME@$HOST "grep -qxF 'DATABASE=${{ secrets.DATABASE }}' /var/www/contact-management-nestjs/backend/.env || echo 'DATABASE=${{ secrets.DATABASE }}' >> /var/www/contact-management-nestjs/backend/.env"
+          ssh $USERNAME@$HOST "grep -qxF 'PORT=${{ secrets.PORT }}' /var/www/contact-management-nestjs/backend/.env || echo 'PORT=${{ secrets.PORT }}' >> /var/www/contact-management-nestjs/backend/.env"
           
       # 7. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
       - name: Restart Application
