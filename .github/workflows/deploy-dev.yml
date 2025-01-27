@@ -48,7 +48,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          rsync -avz --exclude=node_modules --exclude=.git ./package.json ./package-lock.json ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
+          rsync -avz --exclude=node_modules --exclude=.git ./package.json ./package-lock.json ./dist ./prisma $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
           
           # Create .env file on the VPS with the DATABASE_URL
           ssh $USERNAME@$HOST "echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> /var/www/contact-management-nestjs/backend/.env"
