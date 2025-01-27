@@ -51,9 +51,9 @@ jobs:
           rsync -avz --exclude=node_modules --exclude=.git ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
           
           # Create .env file on the VPS with the DATABASE_URL
-          ssh $USERNAME@$HOST "echo 'DATABASE_URL=${DATABASE_URL}' > /var/www/contact-management-nestjs/backend/.env"
-          ssh $USERNAME@$HOST "echo 'DATABASE=${DATABASE}' > /var/www/contact-management-nestjs/backend/.env"
-          ssh $USERNAME@$HOST "echo 'PORT=${PORT}' > /var/www/contact-management-nestjs/backend/.env"
+          ssh $USERNAME@$HOST "echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> /var/www/contact-management-nestjs/backend/.env"
+          ssh $USERNAME@$HOST "echo 'DATABASE=${{ secrets.DATABASE }}' >> /var/www/contact-management-nestjs/backend/.env"
+          ssh $USERNAME@$HOST "echo 'PORT=${{ secrets.PORT }}' >> /var/www/contact-management-nestjs/backend/.env"
           
       # 7. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
       - name: Restart Application
