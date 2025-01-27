@@ -23,10 +23,14 @@ jobs:
 
       # 3. Install dependencies
       - name: Install Dependencies
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Add DATABASE_URL from secrets
         run: npm install
 
       # 4. Run Prisma migration
       - name: Run Prisma Migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Add DATABASE_URL from secrets
         run: npx prisma migrate deploy
 
       # 5. Build aplikasi
@@ -45,12 +49,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
           rsync -avz --exclude=node_modules --exclude=.git ./package.json ./package-lock.json ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
-          
       # 7. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
       - name: Restart Application
         env:
           HOST: ${{ secrets.VPS_HOST }}
           USERNAME: ${{ secrets.VPS_USERNAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Ensure the env var is available for PM2
+          DATABASE: ${{ secrets.DATABASE }}  # Ensure the env var is available for PM2
+          PORT: ${{ secrets.PORT }}  # Ensure the env var is available for PM2
         run: |
           ssh $USERNAME@$HOST "
             cd /var/www/contact-management-nestjs/backend &&
