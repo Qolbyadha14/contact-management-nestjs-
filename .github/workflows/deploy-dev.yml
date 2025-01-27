@@ -25,11 +25,15 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # 4. Build aplikasi
+      # 4. Run Prisma migration
+      - name: Run Prisma Migrate
+        run: npx prisma migrate deploy
+
+      # 5. Build aplikasi
       - name: Build Application
         run: npm run build
 
-      # 5. Salin file ke server VPS
+      # 6. Salin hanya folder dist ke server VPS dan hapus file lain
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -41,17 +45,16 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
           rsync -avz --exclude=node_modules --exclude=.git ./package.json ./package-lock.json ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
-      # 6. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
-      - name: Run Prisma Migrate and Restart Application
+          
+      # 7. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
+      - name: Restart Application
         env:
           HOST: ${{ secrets.VPS_HOST }}
           USERNAME: ${{ secrets.VPS_USERNAME }}
         run: |
           ssh $USERNAME@$HOST "
             cd /var/www/contact-management-nestjs/backend &&
-            # Jalankan migrasi Prisma
-            npx prisma migrate deploy &&
-            # Install dependencies
+            # Install dependencies again to ensure all are present after copy
             npm install --omit=dev &&
             # Restart aplikasi menggunakan PM2
             pm2 start dist/main.js --name contact-management-nestjs-backend || pm2 restart contact-management-nestjs-backend
