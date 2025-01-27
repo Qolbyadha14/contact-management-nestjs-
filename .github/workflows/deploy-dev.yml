@@ -1,0 +1,55 @@
+name: Deploy NestJS App to VPS DEV  
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: DEV
+
+    steps:
+      # 1. Checkout kode repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # 3. Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. Build aplikasi
+      - name: Build Application
+        run: npm run build
+
+      # 5. Salin file ke server VPS
+      - name: Deploy to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOST: ${{ secrets.VPS_HOST }}
+          USERNAME: ${{ secrets.VPS_USERNAME }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          rsync -avz --exclude=node_modules --exclude=.git ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
+
+      # 6. Jalankan aplikasi menggunakan PM2
+      - name: Restart Application
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USERNAME: ${{ secrets.VPS_USERNAME }}
+        run: |
+          ssh $USERNAME@$HOST "
+            cd /var/www/contact-management-nestjs/backend &&
+            npm install --omit=dev &&
+            pm2 start dist/main.js --name contact-management-nestjs-backend || pm2 restart contact-management-nestjs-backend
+          "
