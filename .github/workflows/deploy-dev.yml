@@ -40,7 +40,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          rsync -avz --exclude=node_modules --exclude=.git ./ $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
+          rsync -avz --exclude=node_modules --exclude=.git ./package.json ./package-lock.json ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
       # 6. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
       - name: Run Prisma Migrate and Restart Application
         env:
@@ -54,5 +54,5 @@ jobs:
             # Install dependencies
             npm install --omit=dev &&
             # Restart aplikasi menggunakan PM2
-            pm2 start dist/main.js --name contact-management-nestjs-backend || pm2 restart contact-management-nestjs-backend -f
+            pm2 start dist/main.js --name contact-management-nestjs-backend || pm2 restart contact-management-nestjs-backend
           "
