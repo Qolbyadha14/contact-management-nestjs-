@@ -40,8 +40,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          rsync -avz --exclude=node_modules --exclude=.git ./dist $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
-
+          rsync -avz --exclude=node_modules --exclude=.git ./ $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
       # 6. Jalankan aplikasi menggunakan PM2
       - name: Restart Application
         env:
