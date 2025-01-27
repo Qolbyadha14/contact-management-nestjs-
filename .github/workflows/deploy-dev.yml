@@ -1,21 +1,28 @@
-name: Deploy NestJS App to VPS DEV  
+name: Deploy NestJS App to VPS
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select deployment environment"
+        required: true
+        default: "DEV"
+        type: choice
+        options:
+          - DEV
+          - PROD
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: DEV
+    environment: ${{ inputs.environment }}
 
     steps:
-      # 1. Checkout kode repository
+      # 1. Checkout code repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Install Node.js
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -33,11 +40,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Add DATABASE_URL from secrets
         run: npx prisma migrate deploy
 
-      # 5. Build aplikasi
+      # 5. Build the application
       - name: Build Application
         run: npm run build
 
-      # 6. Salin hanya folder dist ke server VPS dan hapus file lain
+      # 6. Deploy to VPS
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -48,14 +55,14 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          rsync -avz --exclude=node_modules --exclude=.git ./ $USERNAME@$HOST:/var/www/contact-management-nestjs/backend          
+          rsync -avz --exclude=node_modules --exclude=.git ./ $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
           
           # Create .env file on the VPS with the DATABASE_URL
           ssh $USERNAME@$HOST "grep -qxF 'DATABASE_URL=${{ secrets.DATABASE_URL }}' /var/www/contact-management-nestjs/backend/.env || echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> /var/www/contact-management-nestjs/backend/.env"
           ssh $USERNAME@$HOST "grep -qxF 'DATABASE=${{ secrets.DATABASE }}' /var/www/contact-management-nestjs/backend/.env || echo 'DATABASE=${{ secrets.DATABASE }}' >> /var/www/contact-management-nestjs/backend/.env"
           ssh $USERNAME@$HOST "grep -qxF 'PORT=${{ secrets.PORT }}' /var/www/contact-management-nestjs/backend/.env || echo 'PORT=${{ secrets.PORT }}' >> /var/www/contact-management-nestjs/backend/.env"
-          
-      # 7. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
+
+      # 7. Restart application using PM2
       - name: Restart Application
         env:
           HOST: ${{ secrets.VPS_HOST }}
