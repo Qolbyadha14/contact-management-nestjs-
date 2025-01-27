@@ -41,19 +41,18 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
           rsync -avz --exclude=node_modules --exclude=.git ./ $USERNAME@$HOST:/var/www/contact-management-nestjs/backend
-      # 6. Jalankan aplikasi menggunakan PM2
-      - name: Restart Application
+      # 6. Jalankan migrasi Prisma dan restart aplikasi menggunakan PM2
+      - name: Run Prisma Migrate and Restart Application
         env:
           HOST: ${{ secrets.VPS_HOST }}
           USERNAME: ${{ secrets.VPS_USERNAME }}
         run: |
           ssh $USERNAME@$HOST "
-            if [ -f /var/www/contact-management-nestjs/backend/package.json ]; then
-              cd /var/www/contact-management-nestjs/backend &&
-              npm install --omit=dev &&
-              pm2 start dist/main.js --name contact-management-nestjs-backend || pm2 restart contact-management-nestjs-backend
-            else
-              echo 'package.json not found in /var/www/contact-management-nestjs/backend'
-              exit 1
-            fi
+            cd /var/www/contact-management-nestjs/backend &&
+            # Jalankan migrasi Prisma
+            npx prisma migrate deploy &&
+            # Install dependencies
+            npm install --omit=dev &&
+            # Restart aplikasi menggunakan PM2
+            pm2 start dist/main.js --name contact-management-nestjs-backend || pm2 restart contact-management-nestjs-backend
           "
