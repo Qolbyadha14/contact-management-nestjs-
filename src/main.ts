@@ -13,6 +13,7 @@ async function bootstrap() {
     .setDescription('The Contact Manajement API description')
     .setVersion('1.0')
     .addServer('http://localhost:3000/', 'Local environment')
+    .addServer('https://contact-management-api.coreboy.my.id/', 'Development environment')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, documentFactory);
