@@ -71,5 +71,6 @@ jobs:
           ssh $USERNAME@$HOST "
             cd /var/www/contact-management-nestjs/backend &&
             npm install --omit=dev &&
-            pm2 startOrRestart dist/main.js --name contact-management-nestjs-backend
+            pm2 delete contact-management-nestjs-backend || true &&
+            pm2 start dist/main.js --name contact-management-nestjs-backend
           "
