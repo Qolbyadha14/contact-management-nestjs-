@@ -19,7 +19,16 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, documentFactory);
 
   app.useLogger(logger);
-
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'https://contact-management.coreboy.my.id',
+    ],
+    methods: 'GET,POST,PUT,DELETE', // Allow specific HTTP methods
+    allowedHeaders: 'Content-Type, Authorization', // Allow specific headers
+    credentials: true, // Allow cookies or credentials if needed
+  });
+  
   await app.listen(3000);
 }
 bootstrap();
