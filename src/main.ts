@@ -14,6 +14,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addServer('http://localhost:3000/', 'Local environment')
     .addServer('https://contact-management-api.coreboy.my.id/', 'Development environment')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, documentFactory);
@@ -28,7 +29,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization', // Allow specific headers
     credentials: true, // Allow cookies or credentials if needed
   });
-  
+
   await app.listen(3000);
 }
 bootstrap();

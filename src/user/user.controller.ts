@@ -5,7 +5,7 @@ import { WebResponse } from "../model/web.model";
 import { User } from "@prisma/client";
 import { Auth } from "../common/auth.decorator";
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
-
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('User')
 @Controller('/api/users')
@@ -39,6 +39,7 @@ export class UserController {
     }
   }
 
+  @ApiBearerAuth()
   @Get('/current')
   @HttpCode(200)
   async get(@Auth() user: User): Promise<WebResponse<UserResponse>> {
@@ -48,6 +49,7 @@ export class UserController {
     }
   }
 
+  @ApiBearerAuth()
   @Patch('/current')
   @HttpCode(200)
   async update(
@@ -60,6 +62,7 @@ export class UserController {
     }
   }
 
+  @ApiBearerAuth()
   @Delete('/current')
   @HttpCode(200)
   async logout(@Auth() user: User): Promise<WebResponse<Boolean>> {

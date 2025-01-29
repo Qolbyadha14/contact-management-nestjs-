@@ -61,9 +61,33 @@ export class UpdateContactRequest {
 }
 
 export class SearchContactRequest {
+  @ApiProperty({
+    example: 'John',
+    required: false
+  })
   name?: string;
+
+  @ApiProperty({
+    example: 'jhon@example.com',
+    required: false
+  })
   email?: string;
+
+  @ApiProperty({
+    example: '1234567890',
+    required: false
+  })  
   phone_number?: string;
-  page?: number;
-  size?: number
+
+  @ApiProperty({
+    example: 1,
+    required: false
+  })
+  page: number;
+
+  @ApiProperty({
+    example: 10,
+    required: false
+  })
+  size: number
 }

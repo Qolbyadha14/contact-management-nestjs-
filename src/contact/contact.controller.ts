@@ -9,7 +9,9 @@ import {
 import { WebResponse } from "../model/web.model";
 import { Auth } from "../common/auth.decorator";
 import { User } from "@prisma/client";
+import { ApiBearerAuth } from "@nestjs/swagger";
 
+@ApiBearerAuth()
 @Controller("/api/contacts")
 export class ContactController{
   constructor( private contactService: ContactService) {}
@@ -70,21 +72,11 @@ export class ContactController{
   @HttpCode(200)
   async index(
     @Auth() user: User,
-    @Query('name') name?: string,
-    @Query('email') email?: string,
-    @Query('phone_number') phone_number?: string,
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('size', new ParseIntPipe({ optional: true })) size?: number
+    @Query() request: SearchContactRequest
   ): Promise<WebResponse<ContactResponse[]>> {
-    const request: SearchContactRequest = {
-      name: name,
-      email: email,
-      phone_number: phone_number,
-      page: page || 1,
-      size: size || 10
-    }
 
     return this.contactService.search(user, request);
   }
+
 
 }

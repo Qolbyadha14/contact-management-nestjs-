@@ -10,7 +10,9 @@ import {
 } from "../model/address.model";
 import { Auth } from "../common/auth.decorator";
 import { WebResponse } from "../model/web.model";
+import { ApiBearerAuth } from "@nestjs/swagger";
 
+@ApiBearerAuth()
 @Controller('/api/contacts/:contactId/addresses')
 export class AddressController {
   constructor(

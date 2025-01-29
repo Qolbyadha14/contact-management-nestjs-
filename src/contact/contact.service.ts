@@ -70,11 +70,12 @@ export class ContactService {
   }
 
   async search(user: User, request: SearchContactRequest): Promise<WebResponse<ContactResponse[]>> {
+    request.page = request.page ? Number(request.page) : 1;
+    request.size = request.size ? Number(request.size) : 10;
     const searchRequest: SearchContactRequest = this.validationService.validate(
       ContactValidation.SEARCH,
       request
     );
-
     const filters = []
 
     if (searchRequest.name) {
